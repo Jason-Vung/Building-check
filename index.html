@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building Check</title>
+<style>
+  :root {
+    --bg: #f2f4f7;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --text: #14181f;
+    --muted: #667085;
+    --border: #e2e5eb;
+    --primary: #2461f2;
+    --primary-text: #ffffff;
+    --success: #12805c;
+    --success-bg: #e6f6ef;
+    --danger: #d3232f;
+    --danger-bg: #fdecec;
+    --warning: #b25e09;
+    --warning-bg: #fdf1e0;
+    --shadow: 0 1px 3px rgba(20, 24, 31, 0.08), 0 1px 2px rgba(20, 24, 31, 0.06);
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0f1115;
+    --surface: #1a1d24;
+    --surface-2: #21252e;
+    --text: #eef0f4;
+    --muted: #9aa2b1;
+    --border: #2c303a;
+    --primary: #4d84ff;
+    --primary-text: #0f1115;
+    --success: #35c98d;
+    --success-bg: #123527;
+    --danger: #ff6b6b;
+    --danger-bg: #3a1a1a;
+    --warning: #f0a94e;
+    --warning-bg: #3a2a12;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #app {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hidden { display: none !important; }
+
+  /* ---------- Top bar (theme toggle, shown everywhere) ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.2px;
+  }
+
+  .brand .logo-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1;
+  }
+  .icon-btn:active { transform: scale(0.96); }
+
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ---------- Login screen ---------- */
+  .login-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 20px 40px;
+  }
+
+  .login-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .login-header .logo-badge {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--primary);
+    color: var(--primary-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 14px;
+  }
+
+  .login-header h1 {
+    font-size: 21px;
+    margin: 0 0 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .login-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--muted);
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-text);
+    margin-top: 6px;
+  }
+  .btn-primary:active { opacity: 0.85; }
+
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .form-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin: 10px 0 0;
+    display: none;
+  }
+  .form-error.show { display: block; }
+
+  .login-footnote {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+
+  /* ---------- Main app screen ---------- */
+  .main-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .session-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .session-bar .who { color: var(--muted); }
+  .session-bar .who b { color: var(--text); }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px;
+    font-family: inherit;
+  }
+
+  .content {
+    flex: 1;
+    padding: 20px 16px 40px;
+  }
+
+  .placeholder-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 40px 20px;
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+  }
+
+  /* ---------- Checklist ---------- */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin: 0 0 10px 2px;
+  }
+
+
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .check-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+
+  .check-item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .check-index {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .check-label {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.35;
+    padding-top: 2px;
+  }
+
+  .status-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .status-btn {
+    padding: 10px 4px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+  }
+  .status-btn:active { transform: scale(0.97); }
+
+  .status-btn.active[data-status="pass"] {
+    background: var(--success-bg);
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  .status-btn.active[data-status="fail"] {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .status-btn.active[data-status="na"] {
+    background: var(--surface-2);
+    border-color: var(--muted);
+    color: var(--muted);
+  }
+
+  .check-item.state-fail {
+    border-color: var(--danger);
+  }
+
+  .check-item.has-carry-over {
+    border-color: var(--warning);
+  }
+
+  .carry-warning {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning);
+    color: var(--warning);
+    border-radius: 9px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .carry-warning b { font-weight: 700; }
+
+  .note-field {
+    margin-top: 10px;
+  }
+
+  .note-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--danger);
+    margin-bottom: 5px;
+  }
+
+  .note-field textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--danger);
+    background: var(--danger-bg);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .note-field textarea:focus {
+    outline: none;
+    border-width: 2px;
+  }
+
+  .note-field .note-hint {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: var(--danger);
+  }
+
+  /* ---------- Summary ---------- */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+
+  .shift-times {
+    margin: 0 0 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .shift-time-line {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .shift-end-hint {
+    font-size: 11px;
+    opacity: 0.8;
+  }
+
+  .summary-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .summary-score {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+
+  .summary-score-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .status-badge--pass {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+
+  .status-badge--fail {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  .status-badge--pending {
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .summary-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .summary-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--success);
+    transition: width 0.2s ease;
+  }
+
+  .summary-bar-fill.is-fail { background: var(--danger); }
+
+  .summary-counts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .summary-count-item {
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+
+  .summary-count-item .n {
+    display: block;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .summary-count-item .l {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .summary-count-item.c-pass .n { color: var(--success); }
+  .summary-count-item.c-fail .n { color: var(--danger); }
+
+  /* ---------- Export ---------- */
+  .shift-end-card {
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .shift-end-card .shift-time-line { font-size: 13px; }
+
+  .export-card { margin-bottom: 24px; }
+
+  .export-card .btn + .btn { margin-top: 8px; }
+
+  .end-shift-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 8px 0 0;
+  }
+
+  .export-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    margin: 16px 0 8px;
+  }
+  .export-divider::before,
+  .export-divider::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--border);
+  }
+
+  .export-success {
+    color: var(--success);
+    font-size: 13px;
+    margin: 10px 0 0;
+    display: none;
+  }
+  .export-success.show { display: block; }
+
+  .check-item.flash-invalid {
+    animation: flash-border 1.4s ease;
+  }
+
+  @keyframes flash-border {
+    0%, 100% { border-color: var(--danger); }
+    50% { border-color: var(--border); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div id="login-screen" class="login-screen">
+    <div class="topbar" style="position:static; border:none; padding:0; margin-bottom:20px;">
+      <span></span>
+      <button type="button" class="icon-btn" id="theme-toggle-login" aria-label="Đổi giao diện sáng/tối">🌙</button>
+    </div>
+
+    <div class="login-header">
+      <div class="logo-badge">🏗️</div>
+      <h1>Building Check</h1>
+      <p>Chấm checklist an toàn đầu ca</p>
+    </div>
+
+    <form class="card" id="login-form" novalidate>
+      <div class="field">
+        <label for="login-name">Tên giám sát</label>
+        <input type="text" id="login-name" name="name" placeholder="Nguyễn Văn A" autocomplete="name" required>
+      </div>
+      <div class="field">
+        <label for="login-password">Mật khẩu</label>
+        <input type="password" id="login-password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Đăng nhập</button>
+      <p class="form-error" id="login-error" aria-live="polite">Vui lòng nhập tên giám sát.</p>
+    </form>
+
+    <p class="login-footnote">Bản demo nội bộ — mật khẩu chỉ mang tính minh hoạ, không dùng để bảo mật dữ liệu thật.</p>
+  </div>
+
+  <!-- ================= MAIN APP SCREEN ================= -->
+  <div id="main-screen" class="main-screen hidden">
+    <div class="topbar">
+      <div class="brand"><span class="logo-dot"></span>Building Check</div>
+      <div class="topbar-actions">
+        <button type="button" class="icon-btn" id="theme-toggle-main" aria-label="Đổi giao diện sáng/tối">🌙</button>
+      </div>
+    </div>
+
+    <div class="session-bar">
+      <span class="who">Giám sát: <b id="session-name">—</b></span>
+      <button type="button" class="link-btn" id="logout-btn">Đăng xuất</button>
+    </div>
+
+    <div class="content">
+      <p class="section-title">Tổng kết ca trực</p>
+      <div class="summary-card" id="summary-card">
+        <div class="shift-times">
+          <p class="shift-time-line" id="shift-start-line">🕐 Bắt đầu ca: —</p>
+          <p class="shift-time-line" id="shift-end-line">🏁 Kết thúc ca: — <span class="shift-end-hint">(tự ghi khi bấm Kết thúc ca)</span></p>
+        </div>
+        <div class="summary-top">
+          <div>
+            <div class="summary-score" id="summary-score">0%</div>
+            <div class="summary-score-label" id="summary-score-label">0/0 mục đạt</div>
+          </div>
+          <span class="status-badge status-badge--pending" id="summary-badge">Chưa hoàn thành</span>
+        </div>
+        <div class="summary-bar">
+          <div class="summary-bar-fill" id="summary-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div class="summary-counts">
+          <div class="summary-count-item c-pass">
+            <span class="n" id="count-pass">0</span>
+            <span class="l">Đạt</span>
+          </div>
+          <div class="summary-count-item c-fail">
+            <span class="n" id="count-fail">0</span>
+            <span class="l">Không đạt</span>
+          </div>
+          <div class="summary-count-item c-na">
+            <span class="n" id="count-na">0</span>
+            <span class="l">Không áp dụng</span>
+          </div>
+          <div class="summary-count-item c-pending">
+            <span class="n" id="count-pending">10</span>
+            <span class="l">Chưa chấm</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-title">Checklist an toàn đầu ca</p>
+      <div class="checklist" id="checklist"></div>
+
+      <div class="card shift-end-card">
+        <p class="shift-time-line" id="shift-end-line-bottom">🏁 Kết thúc ca: — <span class="shift-end-hint">(tự ghi khi bấm Kết thúc ca)</span></p>
+      </div>
+
+      <div class="card export-card">
+        <button type="button" class="btn btn-primary" id="end-shift-btn">🏁 Kết thúc ca</button>
+        <p class="end-shift-hint">Tự động lưu file JSON của ca hôm nay, sau đó chuyển sang ca/ngày mới.</p>
+
+        <div class="export-divider">hoặc chỉ lưu tạm, chưa kết thúc ca</div>
+
+        <button type="button" class="btn btn-secondary" id="export-btn">⬇️ Xuất kết quả (JSON)</button>
+        <button type="button" class="btn btn-secondary" id="copy-btn">📋 Sao chép JSON</button>
+        <p class="form-error" id="export-error" aria-live="polite"></p>
+        <p class="export-success" id="export-success" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_SESSION = "bc_session";
+  var STORAGE_THEME = "bc_theme";
+  var STORAGE_CHECKLIST = "bc_checklist";
+  var STORAGE_SHIFT_START = "bc_shift_start";
+  var STORAGE_SHIFT_END = "bc_shift_end";
+  var VN_TIMEZONE = "Asia/Ho_Chi_Minh";
+
+  // ---------- Checklist data ----------
+  var CHECKLIST_ITEMS = [
+    { id: "helmet", label: "Mũ bảo hộ" },
+    { id: "boots", label: "Giày bảo hộ lao động" },
+    { id: "harness", label: "Dây đai an toàn (làm việc trên cao)" },
+    { id: "floor-opening", label: "Che chắn hố / lỗ mở sàn" },
+    { id: "extinguisher", label: "Bình chữa cháy" },
+    { id: "escape-route", label: "Đường / lối thoát hiểm" },
+    { id: "warning-sign", label: "Biển báo & rào chắn khu vực nguy hiểm" },
+    { id: "temp-electric", label: "Hệ thống điện tạm (dây, tủ điện, aptomat)" },
+    { id: "scaffold", label: "Giàn giáo / thang đạt chuẩn" },
+    { id: "housekeeping", label: "Vệ sinh mặt bằng, dọn vật cản lối đi" }
+  ];
+
+  var STATUS_LABELS = { pass: "Đạt", fail: "Không đạt", na: "Không áp dụng" };
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  var checklistState = null; // array of { id, label, status, note }
+
+  var loginScreen = document.getElementById("login-screen");
+  var mainScreen = document.getElementById("main-screen");
+  var loginForm = document.getElementById("login-form");
+  var loginNameInput = document.getElementById("login-name");
+  var loginPasswordInput = document.getElementById("login-password");
+  var loginError = document.getElementById("login-error");
+  var sessionNameEl = document.getElementById("session-name");
+  var logoutBtn = document.getElementById("logout-btn");
+  var themeToggleLogin = document.getElementById("theme-toggle-login");
+  var themeToggleMain = document.getElementById("theme-toggle-main");
+
+  // ---------- Theme handling ----------
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    var icon = theme === "dark" ? "☀️" : "🌙";
+    themeToggleLogin.textContent = icon;
+    themeToggleMain.textContent = icon;
+  }
+
+  function getStoredTheme() {
+    try {
+      return localStorage.getItem(STORAGE_THEME);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setStoredTheme(theme) {
+    try {
+      localStorage.setItem(STORAGE_THEME, theme);
+    } catch (e) { /* ignore quota / privacy mode errors */ }
+  }
+
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") || "light";
+  }
+
+  function toggleTheme() {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    applyTheme(next);
+    setStoredTheme(next);
+  }
+
+  function initTheme() {
+    var stored = getStoredTheme();
+    if (stored === "dark" || stored === "light") {
+      applyTheme(stored);
+      return;
+    }
+    var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(prefersDark ? "dark" : "light");
+  }
+
+  themeToggleLogin.addEventListener("click", toggleTheme);
+  themeToggleMain.addEventListener("click", toggleTheme);
+
+  // ---------- Session handling ----------
+  function getSession() {
+    try {
+      var raw = localStorage.getItem(STORAGE_SESSION);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setSession(name) {
+    var session = { name: name, loginAt: new Date().toISOString() };
+    try {
+      localStorage.setItem(STORAGE_SESSION, JSON.stringify(session));
+    } catch (e) { /* ignore */ }
+    return session;
+  }
+
+  function clearSession() {
+    try {
+      localStorage.removeItem(STORAGE_SESSION);
+    } catch (e) { /* ignore */ }
+  }
+
+  // ---------- Shift start time (Vietnam timezone) ----------
+  function getShiftStart() {
+    try {
+      return localStorage.getItem(STORAGE_SHIFT_START);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setShiftStart(date) {
+    var iso = date.toISOString();
+    try {
+      localStorage.setItem(STORAGE_SHIFT_START, iso);
+    } catch (e) { /* ignore */ }
+    return iso;
+  }
+
+  function formatVNDateTime(isoString) {
+    if (!isoString) return "—";
+    var date = new Date(isoString);
+    if (isNaN(date.getTime())) return "—";
+    try {
+      var formatted = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: VN_TIMEZONE,
+        hour: "2-digit",
+        minute: "2-digit",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour12: false
+      }).format(date);
+      return formatted + " (giờ VN)";
+    } catch (e) {
+      return date.toLocaleString("vi-VN");
+    }
+  }
+
+  function getShiftEnd() {
+    try {
+      return localStorage.getItem(STORAGE_SHIFT_END);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setShiftEnd(date) {
+    var iso = date.toISOString();
+    try {
+      localStorage.setItem(STORAGE_SHIFT_END, iso);
+    } catch (e) { /* ignore */ }
+    return iso;
+  }
+
+  function clearShiftEnd() {
+    try {
+      localStorage.removeItem(STORAGE_SHIFT_END);
+    } catch (e) { /* ignore */ }
+  }
+
+  function renderShiftStart() {
+    var iso = getShiftStart();
+    shiftStartLineEl.textContent = "🕐 Bắt đầu ca: " + formatVNDateTime(iso);
+  }
+
+  function renderShiftEnd() {
+    var iso = getShiftEnd();
+    var html = iso
+      ? "🏁 Kết thúc ca: " + formatVNDateTime(iso)
+      : "🏁 Kết thúc ca: — <span class=\"shift-end-hint\">(tự ghi khi bấm Kết thúc ca)</span>";
+    shiftEndLineEl.innerHTML = html;
+    shiftEndLineBottomEl.innerHTML = html;
+  }
+
+  // ---------- Checklist handling ----------
+  var checklistEl = document.getElementById("checklist");
+  var shiftStartLineEl = document.getElementById("shift-start-line");
+  var shiftEndLineEl = document.getElementById("shift-end-line");
+  var shiftEndLineBottomEl = document.getElementById("shift-end-line-bottom");
+  var summaryScoreEl = document.getElementById("summary-score");
+  var summaryScoreLabelEl = document.getElementById("summary-score-label");
+  var summaryBadgeEl = document.getElementById("summary-badge");
+  var summaryBarFillEl = document.getElementById("summary-bar-fill");
+  var countPassEl = document.getElementById("count-pass");
+  var countFailEl = document.getElementById("count-fail");
+  var countNaEl = document.getElementById("count-na");
+  var countPendingEl = document.getElementById("count-pending");
+
+  function loadChecklistState() {
+    var stored = null;
+    try {
+      var raw = localStorage.getItem(STORAGE_CHECKLIST);
+      stored = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      stored = null;
+    }
+
+    return CHECKLIST_ITEMS.map(function (item) {
+      var saved = stored && stored.find ? stored.find(function (s) { return s.id === item.id; }) : null;
+      return {
+        id: item.id,
+        label: item.label,
+        status: saved ? saved.status : null,
+        note: saved && saved.note ? saved.note : "",
+        // Ghi nhận mục "Không đạt" của ca/ngày trước chưa được khắc phục xong,
+        // để cảnh báo cho ca sau tới khi nào mục đó thực sự được chấm "Đạt".
+        carriedOver: saved && saved.carriedOver ? saved.carriedOver : null
+      };
+    });
+  }
+
+  function saveChecklistState() {
+    try {
+      localStorage.setItem(STORAGE_CHECKLIST, JSON.stringify(checklistState));
+    } catch (e) { /* ignore */ }
+  }
+
+  function renderChecklist() {
+    checklistEl.innerHTML = "";
+    checklistState.forEach(function (item, index) {
+      var card = document.createElement("div");
+      card.className = "check-item";
+      card.setAttribute("data-id", item.id);
+
+      // "Chưa đạt từ ca trước" chỉ thực sự được xoá cảnh báo khi mục này được
+      // chấm lại là "Đạt" hoặc "Không áp dụng" trong ca hiện tại.
+      var showCarryWarning = !!item.carriedOver && item.status !== "pass" && item.status !== "na";
+
+      if (item.status === "fail") {
+        card.classList.add("state-fail");
+      } else if (showCarryWarning) {
+        card.classList.add("has-carry-over");
+      }
+
+      var header = document.createElement("div");
+      header.className = "check-item-header";
+
+      var idx = document.createElement("span");
+      idx.className = "check-index";
+      idx.textContent = String(index + 1);
+
+      var label = document.createElement("span");
+      label.className = "check-label";
+      label.textContent = item.label;
+
+      header.appendChild(idx);
+      header.appendChild(label);
+      card.appendChild(header);
+
+      if (showCarryWarning) {
+        var warning = document.createElement("div");
+        warning.className = "carry-warning";
+        warning.innerHTML = "⚠️ <b>Chưa đạt từ ca trước</b> (" + formatVNDateTime(item.carriedOver.failedAt) + "): " +
+          escapeHtml(item.carriedOver.note || "(không có ghi chú)");
+        card.appendChild(warning);
+      }
+
+      var group = document.createElement("div");
+      group.className = "status-group";
+      group.setAttribute("role", "group");
+
+      ["pass", "fail", "na"].forEach(function (statusKey) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "status-btn";
+        btn.setAttribute("data-status", statusKey);
+        btn.textContent = STATUS_LABELS[statusKey];
+        if (item.status === statusKey) btn.classList.add("active");
+        group.appendChild(btn);
+      });
+
+      card.appendChild(group);
+
+      if (item.status === "fail") {
+        var noteField = document.createElement("div");
+        noteField.className = "note-field";
+
+        var noteLabel = document.createElement("label");
+        noteLabel.setAttribute("for", "note-" + item.id);
+        noteLabel.textContent = "Ghi chú (bắt buộc)";
+
+        var noteInput = document.createElement("textarea");
+        noteInput.className = "note-input";
+        noteInput.id = "note-" + item.id;
+        noteInput.placeholder = "Mô tả lỗi và hướng khắc phục...";
+        noteInput.value = item.note || "";
+
+        noteField.appendChild(noteLabel);
+        noteField.appendChild(noteInput);
+
+        if (!item.note) {
+          var noteHint = document.createElement("p");
+          noteHint.className = "note-hint";
+          noteHint.textContent = "Vui lòng ghi rõ lý do không đạt.";
+          noteField.appendChild(noteHint);
+        }
+
+        card.appendChild(noteField);
+      }
+
+      checklistEl.appendChild(card);
+    });
+
+    renderSummary();
+  }
+
+  // Rounds to 1 decimal place and trims a trailing ".0" so 100/66.7/83.3 all read naturally.
+  function formatPercent(value) {
+    var rounded = Math.round(value * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  }
+
+  function computeSummary() {
+    var pass = 0, fail = 0, na = 0, pending = 0;
+    checklistState.forEach(function (item) {
+      if (item.status === "pass") pass++;
+      else if (item.status === "fail") fail++;
+      else if (item.status === "na") na++;
+      else pending++;
+    });
+
+    // Điểm % chỉ tính trên các mục ĐÃ CÓ KẾT LUẬN (Đạt/Không đạt).
+    // "Không áp dụng" và "chưa chấm" không đưa vào mẫu số vì chưa có căn cứ để tính đạt/không đạt.
+    var applicable = pass + fail;
+    var scorePercent = applicable > 0 ? Math.round((pass / applicable) * 1000) / 10 : null;
+
+    var shiftStatus; // "pass" | "fail" | "pending"
+    if (fail > 0) {
+      shiftStatus = "fail";
+    } else if (pending > 0) {
+      shiftStatus = "pending";
+    } else {
+      shiftStatus = "pass";
+    }
+
+    return {
+      pass: pass,
+      fail: fail,
+      na: na,
+      pending: pending,
+      applicable: applicable,
+      scorePercent: scorePercent, // number rounded to 1 decimal, or null if nothing gradable yet
+      shiftStatus: shiftStatus
+    };
+  }
+
+  function renderSummary() {
+    var s = computeSummary();
+
+    if (s.scorePercent === null) {
+      summaryScoreEl.textContent = "—";
+      summaryBarFillEl.style.width = "0%";
+    } else {
+      summaryScoreEl.textContent = formatPercent(s.scorePercent) + "%";
+      summaryBarFillEl.style.width = s.scorePercent + "%";
+    }
+
+    var labelParts = [];
+    labelParts.push(s.applicable > 0
+      ? (s.pass + "/" + s.applicable + " mục đạt")
+      : "Chưa có mục nào được chấm Đạt/Không đạt");
+    if (s.na > 0) labelParts.push(s.na + " không áp dụng");
+    if (s.pending > 0) labelParts.push("còn " + s.pending + " mục chưa chấm");
+    summaryScoreLabelEl.textContent = labelParts.join(" · ");
+
+    summaryBarFillEl.classList.toggle("is-fail", s.shiftStatus === "fail");
+
+    summaryBadgeEl.classList.remove("status-badge--pass", "status-badge--fail", "status-badge--pending");
+    if (s.shiftStatus === "fail") {
+      summaryBadgeEl.classList.add("status-badge--fail");
+      summaryBadgeEl.textContent = "KHÔNG ĐẠT";
+    } else if (s.shiftStatus === "pass") {
+      summaryBadgeEl.classList.add("status-badge--pass");
+      summaryBadgeEl.textContent = "ĐẠT";
+    } else {
+      summaryBadgeEl.classList.add("status-badge--pending");
+      summaryBadgeEl.textContent = "Chưa hoàn thành";
+    }
+
+    countPassEl.textContent = s.pass;
+    countFailEl.textContent = s.fail;
+    countNaEl.textContent = s.na;
+    countPendingEl.textContent = s.pending;
+  }
+
+  checklistEl.addEventListener("click", function (evt) {
+    var btn = evt.target.closest(".status-btn");
+    if (!btn) return;
+
+    var card = btn.closest(".check-item");
+    var id = card.getAttribute("data-id");
+    var status = btn.getAttribute("data-status");
+
+    var item = checklistState.find(function (s) { return s.id === id; });
+    if (!item) return;
+
+    item.status = status;
+    saveChecklistState();
+    renderChecklist();
+  });
+
+  checklistEl.addEventListener("input", function (evt) {
+    var ta = evt.target.closest("textarea.note-input");
+    if (!ta) return;
+
+    var card = ta.closest(".check-item");
+    var id = card.getAttribute("data-id");
+    var item = checklistState.find(function (s) { return s.id === id; });
+    if (!item) return;
+
+    item.note = ta.value;
+    saveChecklistState();
+
+    // Toggle the "required" hint without a full re-render, so focus is preserved.
+    var hint = card.querySelector(".note-hint");
+    if (item.note.trim()) {
+      if (hint) hint.remove();
+    } else if (!hint) {
+      var newHint = document.createElement("p");
+      newHint.className = "note-hint";
+      newHint.textContent = "Vui lòng ghi rõ lý do không đạt.";
+      card.querySelector(".note-field").appendChild(newHint);
+    }
+  });
+
+  // ---------- Export ----------
+  var exportBtn = document.getElementById("export-btn");
+  var copyBtn = document.getElementById("copy-btn");
+  var exportErrorEl = document.getElementById("export-error");
+  var exportSuccessEl = document.getElementById("export-success");
+  var SHIFT_STATUS_LABELS = { pass: "ĐẠT", fail: "KHÔNG ĐẠT", pending: "CHƯA HOÀN THÀNH" };
+
+  function getInvalidFailItems() {
+    return checklistState.filter(function (item) {
+      return item.status === "fail" && (!item.note || !item.note.trim());
+    });
+  }
+
+  function clearExportMessages() {
+    exportErrorEl.classList.remove("show");
+    exportErrorEl.textContent = "";
+    exportSuccessEl.classList.remove("show");
+    exportSuccessEl.textContent = "";
+  }
+
+  function showExportError(invalidItems) {
+    exportSuccessEl.classList.remove("show");
+    exportErrorEl.textContent = "Còn " + invalidItems.length +
+      " mục \"Không đạt\" chưa nhập ghi chú. Vui lòng bổ sung trước khi xuất.";
+    exportErrorEl.classList.add("show");
+
+    var firstItem = invalidItems[0];
+    var card = checklistEl.querySelector('.check-item[data-id="' + firstItem.id + '"]');
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.classList.remove("flash-invalid");
+      // Force reflow so the animation can restart if triggered twice in a row.
+      void card.offsetWidth;
+      card.classList.add("flash-invalid");
+      var textarea = card.querySelector("textarea.note-input");
+      if (textarea) textarea.focus();
+    }
+  }
+
+  function showExportSuccess(message) {
+    exportErrorEl.classList.remove("show");
+    exportSuccessEl.textContent = message;
+    exportSuccessEl.classList.add("show");
+  }
+
+  function buildExportPayload(endedAtIso) {
+    var summary = computeSummary();
+    var session = getSession();
+
+    var shiftStartIso = getShiftStart();
+
+    return {
+      app: "Building Check",
+      exportedAt: endedAtIso,
+      supervisor: session ? session.name : null,
+      shift: {
+        startedAt: shiftStartIso,
+        startedAtVN: formatVNDateTime(shiftStartIso),
+        endedAt: endedAtIso,
+        endedAtVN: formatVNDateTime(endedAtIso),
+        scorePercent: summary.scorePercent,
+        scorePercentDisplay: summary.scorePercent === null ? null : formatPercent(summary.scorePercent),
+        status: summary.shiftStatus,
+        statusLabel: SHIFT_STATUS_LABELS[summary.shiftStatus],
+        counts: {
+          pass: summary.pass,
+          fail: summary.fail,
+          na: summary.na,
+          pending: summary.pending
+        },
+        // Số mục còn tồn đọng "Không đạt" mang sang từ (các) ca trước, chưa được chấm "Đạt".
+        outstandingFromPreviousShift: checklistState.filter(function (item) { return !!item.carriedOver; }).length
+      },
+      items: checklistState.map(function (item) {
+        return {
+          id: item.id,
+          label: item.label,
+          status: item.status,
+          statusLabel: item.status ? STATUS_LABELS[item.status] : null,
+          note: item.status === "fail" ? (item.note || "") : "",
+          carriedOverFromPreviousShift: item.carriedOver
+            ? { note: item.carriedOver.note, failedAt: item.carriedOver.failedAt, failedAtVN: formatVNDateTime(item.carriedOver.failedAt) }
+            : null
+        };
+      })
+    };
+  }
+
+  function buildExportFilename(date) {
+    var now = date || new Date();
+    var pad = function (n) { return String(n).padStart(2, "0"); };
+    var stamp = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) +
+      "_" + pad(now.getHours()) + pad(now.getMinutes());
+    return "building-check_" + stamp + ".json";
+  }
+
+  function downloadJSON(payload, date) {
+    var json = JSON.stringify(payload, null, 2);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = buildExportFilename(date);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function copyJSONToClipboard(payload) {
+    var json = JSON.stringify(payload, null, 2);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(json);
+    }
+    // Fallback for browsers without the async Clipboard API.
+    var textarea = document.createElement("textarea");
+    textarea.value = json;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+      document.execCommand("copy");
+    } finally {
+      document.body.removeChild(textarea);
+    }
+    return Promise.resolve();
+  }
+
+  exportBtn.addEventListener("click", function () {
+    var invalid = getInvalidFailItems();
+    if (invalid.length) {
+      showExportError(invalid);
+      return;
+    }
+    clearExportMessages();
+    var now = new Date();
+    var payload = buildExportPayload(now.toISOString());
+    downloadJSON(payload, now);
+    showExportSuccess("Đã tải file JSON: " + buildExportFilename(now));
+  });
+
+  copyBtn.addEventListener("click", function () {
+    var invalid = getInvalidFailItems();
+    if (invalid.length) {
+      showExportError(invalid);
+      return;
+    }
+    clearExportMessages();
+    var now = new Date();
+    var payload = buildExportPayload(now.toISOString());
+    copyJSONToClipboard(payload).then(function () {
+      showExportSuccess("Đã sao chép JSON vào clipboard.");
+    }).catch(function () {
+      exportErrorEl.textContent = "Không thể sao chép tự động — vui lòng thử lại hoặc dùng nút Xuất file.";
+      exportErrorEl.classList.add("show");
+    });
+  });
+
+  // ---------- Kết thúc ca (tự xuất JSON rồi chuyển sang ca/ngày mới) ----------
+  var endShiftBtn = document.getElementById("end-shift-btn");
+
+  endShiftBtn.addEventListener("click", function () {
+    var invalid = getInvalidFailItems();
+    if (invalid.length) {
+      showExportError(invalid);
+      return;
+    }
+
+    var failingNow = checklistState.filter(function (item) { return item.status === "fail"; });
+    var confirmMessage = "Kết thúc ca hôm nay?\n" +
+      "Hệ thống sẽ tự động tải file JSON lưu lại kết quả, sau đó chuyển sang ca/ngày mới " +
+      "(checklist về trạng thái chưa chấm).\nThao tác này không thể hoàn tác.";
+    if (failingNow.length) {
+      confirmMessage += "\n\n⚠️ " + failingNow.length +
+        " mục đang \"Không đạt\" sẽ được mang sang ca sau kèm cảnh báo, tới khi được chấm \"Đạt\".";
+    }
+    var confirmed = window.confirm(confirmMessage);
+    if (!confirmed) return;
+
+    var now = new Date();
+    var nowIso = now.toISOString();
+
+    // 1) Tự động xuất JSON — lưu lại toàn bộ kết quả của ca vừa kết thúc.
+    clearExportMessages();
+    var payload = buildExportPayload(nowIso);
+    downloadJSON(payload, now);
+
+    // 2) Mang cảnh báo "Không đạt" (nếu có) sang ca sau, rồi đưa checklist về trạng thái chưa chấm.
+    checklistState = checklistState.map(function (item) {
+      var carriedOver = item.carriedOver || null;
+
+      if (item.status === "fail") {
+        // Vẫn "Không đạt" khi kết ca -> mang cảnh báo (kèm ghi chú mới nhất) sang ca sau.
+        carriedOver = { note: item.note || "", failedAt: nowIso };
+      } else if (item.status === "pass" || item.status === "na") {
+        // Đã được chấm lại là Đạt / Không áp dụng trong ca này -> coi như đã xử lý xong.
+        carriedOver = null;
+      }
+      // Nếu vẫn "chưa chấm" (bỏ qua, không kiểm tra lại) -> giữ nguyên cảnh báo cũ (nếu có).
+
+      return { id: item.id, label: item.label, status: null, note: "", carriedOver: carriedOver };
+    });
+    saveChecklistState();
+
+    // 3) Ca vừa kết thúc và ca mới bắt đầu tại cùng một thời điểm -> mở luôn ca mới (ngày hôm sau).
+    setShiftStart(now);
+    clearShiftEnd();
+    renderShiftStart();
+    renderShiftEnd();
+    renderChecklist();
+
+    showExportSuccess("Đã lưu file " + buildExportFilename(now) + " và chuyển sang ca mới.");
+  });
+
+  function showLogin() {
+    loginScreen.classList.remove("hidden");
+    mainScreen.classList.add("hidden");
+  }
+
+  function showMain(session) {
+    sessionNameEl.textContent = session.name;
+    loginScreen.classList.add("hidden");
+    mainScreen.classList.remove("hidden");
+  }
+
+  loginForm.addEventListener("submit", function (evt) {
+    evt.preventDefault();
+    var name = loginNameInput.value.trim();
+    var password = loginPasswordInput.value;
+
+    if (!name) {
+      loginError.textContent = "Vui lòng nhập tên giám sát.";
+      loginError.classList.add("show");
+      loginNameInput.focus();
+      return;
+    }
+    if (!password) {
+      loginError.textContent = "Vui lòng nhập mật khẩu (bất kỳ).";
+      loginError.classList.add("show");
+      loginPasswordInput.focus();
+      return;
+    }
+
+    loginError.classList.remove("show");
+    var session = setSession(name);
+    showMain(session);
+  });
+
+  logoutBtn.addEventListener("click", function () {
+    clearSession();
+    loginForm.reset();
+    showLogin();
+  });
+
+  // ---------- Init ----------
+  initTheme();
+  checklistState = loadChecklistState();
+  if (!getShiftStart()) setShiftStart(new Date());
+  renderShiftStart();
+  renderShiftEnd();
+  renderChecklist();
+  var existingSession = getSession();
+  if (existingSession && existingSession.name) {
+    showMain(existingSession);
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
